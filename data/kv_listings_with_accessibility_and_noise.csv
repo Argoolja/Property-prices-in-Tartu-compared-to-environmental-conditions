@@ -1,4 +1,4 @@
-Index,Address,Room Count,Size,Price,Teenus_arv,Teenustase,Tookoht_protsent,Kool_arv,Lasteaed_arv,Toidupood_arv,Toidukoht_arv,Parkimisnorm,Parkimis_koefitsent,MYRAKLASS,Longitude,Latitude,Distance
+Index,Address,Room Count,Size,Price,Teenus_arv,Teenustase,Tookoht_protsent,Kool_arv,Lasteaed_arv,Toidupood_arv,Toidukoht_arv,Parkimisnorm,Parkimis_koefitsent,Noise,Longitude,Latitude,Distance
 1,"Tartu, Tartu linn, Raadi-Kruusamäe, Kaupmehe tn 12-9",3,64.3 m²,175 900 €,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,46.17695630081301,26.7477789478951,58.346265205735016,4053.659932806331
 2,"Tartu, Ülejõe, Staadioni 3",4,75 m²,235 000 €,37.0,Hea tase,58.68464216,2.0,3.0,8.0,21.0,41.0,0.41315358,50.0,26.726606000000007,58.388360000000006,954.4244478621505
 3,"Tartu, Tartu linn, Raadi-Kruusamäe, Kaupmehe tn 12-1",2,50.8 m²,160 900 €,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,46.17695630081301,26.7477789478951,58.346265205735016,4053.659932806331
