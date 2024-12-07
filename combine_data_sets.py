@@ -23,7 +23,7 @@ def expand_accessibility_addresses(row):
             if street_name:
                 addresses.append(f"{street_name} {normalized}")
     
-    return [(addr, row['Teenustase']) for addr in addresses]
+    return [(addr, row["Teenus_arv"], row['Teenustase'], row["Tookoht_protsent"], row["Kool_arv"], row["Lasteaed_arv"], row["Toidupood_arv"], row["Toidukoht_arv"], row["Parkimisnorm"], row["Parkimis_koefitsent"]) for addr in addresses]
 
 def create_alternative_address(address):
     if " tn" in address:
@@ -34,14 +34,44 @@ def create_alternative_address(address):
 def match_accessibility(kv_address, accessibility_df):
     match = accessibility_df[accessibility_df['Normalized_Aadress'] == kv_address]
     if not match.empty:
-        return match.iloc[0]['Teenustase']
-    
+        return {
+                "Teenus_arv": match.iloc[0]["Teenus_arv"],
+                "Teenustase": match.iloc[0]["Teenustase"],
+                "Tookoht_protsent": match.iloc[0]["Tookoht_protsent"],
+                "Kool_arv": match.iloc[0]["Kool_arv"],
+                "Lasteaed_arv": match.iloc[0]["Lasteaed_arv"],
+                "Toidupood_arv": match.iloc[0]["Toidupood_arv"],
+                "Toidukoht_arv": match.iloc[0]["Toidukoht_arv"],
+                "Parkimisnorm": match.iloc[0]["Parkimisnorm"],
+                "Parkimis_koefitsent": match.iloc[0]["Parkimis_koefitsent"],
+            }
     alternative = create_alternative_address(kv_address)
     match = accessibility_df[accessibility_df['Normalized_Aadress'] == alternative]
     if not match.empty:
-        return match.iloc[0]['Teenustase']
-    
-    return "-"
+        return {
+                "Teenus_arv": match.iloc[0]["Teenus_arv"],
+                "Teenustase": match.iloc[0]["Teenustase"],
+                "Tookoht_protsent": match.iloc[0]["Tookoht_protsent"],
+                "Kool_arv": match.iloc[0]["Kool_arv"],
+                "Lasteaed_arv": match.iloc[0]["Lasteaed_arv"],
+                "Toidupood_arv": match.iloc[0]["Toidupood_arv"],
+                "Toidukoht_arv": match.iloc[0]["Toidukoht_arv"],
+                "Parkimisnorm": match.iloc[0]["Parkimisnorm"],
+                "Parkimis_koefitsent": match.iloc[0]["Parkimis_koefitsent"],
+            }
+
+    return {
+        "Teenus_arv": 0,
+        "Teenustase": 0,
+        "Tookoht_protsent": 0,
+        "Kool_arv": 0,
+        "Lasteaed_arv": 0,
+        "Toidupood_arv": 0,
+        "Toidukoht_arv": 0,
+        "Parkimisnorm": 0,
+        "Parkimis_koefitsent": 0,
+    }
+
 
 def match_noise_pollution(kv_address, noise_df, fallback_value):
     match = noise_df[noise_df['lahiaadres'] == kv_address]
@@ -73,14 +103,21 @@ if __name__ == "__main__":
     ).explode().reset_index(drop=True)
 
     expanded_accessibility_df = pd.DataFrame(
-        expanded_accessibility.tolist(), columns=['Normalized_Aadress', 'Teenustase']
+        expanded_accessibility.tolist(), columns=['Normalized_Aadress', 'Teenus_arv',
+                                                  'Teenustase', 'Tookoht_protsent', 'Kool_arv',
+                                                  'Lasteaed_arv', 'Toidupood_arv', 'Toidukoht_arv',
+                                                  'Parkimisnorm', 'Parkimis_koefitsent']
     )
 
     kv_listings['Normalized_Address'] = kv_listings['Address'].apply(normalize_address)
 
-    kv_listings['Accessibility'] = kv_listings['Normalized_Address'].apply(
+    filtered_accessibility = kv_listings['Normalized_Address'].apply(
         lambda addr: match_accessibility(addr, expanded_accessibility_df)
     )
+
+    filtered_accessibility = pd.DataFrame(list(filtered_accessibility))
+
+    kv_listings = pd.concat([kv_listings, filtered_accessibility], axis=1)
 
     kv_listings['MYRAKLASS'] = kv_listings['Normalized_Address'].apply(
         lambda addr: match_noise_pollution(addr, noise_pollution_filtered, mean_myraklass)
