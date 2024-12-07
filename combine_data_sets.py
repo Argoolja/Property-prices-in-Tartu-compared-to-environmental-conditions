@@ -1,4 +1,6 @@
 import pandas as pd
+from geopy.geocoders import Nominatim
+from geopy.distance import distance
 import re
 
 def normalize_address(address):
@@ -85,12 +87,26 @@ def match_noise_pollution(kv_address, noise_df, fallback_value):
     
     return fallback_value
 
+def get_coordinates(kv_address, geolocator):
+    print("Looking for: " + "Tartu " + kv_address)
+    location = geolocator.geocode("Tartu " + kv_address)
+    if location:
+        return location.latitude, location.longitude
+    
+    alternative = create_alternative_address(kv_address)
+    print("Looking for: " + "Tartu " + alternative)
+    location = geolocator.geocode("Tartu " + alternative)
+    if location:
+        return location.latitude, location.longitude
+    print("Address not found! " + kv_address)
+    return None, None
 
 if __name__ == "__main__":
- 
+    geolocator = Nominatim(user_agent="c09")
     kv_listings = pd.read_csv("data/kv_listings.csv")
     accessibility = pd.read_csv("data/accessibility.csv")
     noise_pollution = pd.read_csv("data/noise_pollution.csv")
+    coordinates = pd.read_csv("data/coordinates.csv")
 
     noise_pollution_tartu = noise_pollution[noise_pollution['taisaadres'].str.contains("Tartu", case=False, na=False)]
     noise_pollution_filtered = noise_pollution_tartu[['lahiaadres', 'MYRAKLASS']]
@@ -124,6 +140,15 @@ if __name__ == "__main__":
     )
 
     kv_listings['MYRAKLASS'] = pd.to_numeric(kv_listings['MYRAKLASS'], errors='coerce')
+
+    # Uncomment these lines if you want to rerun the lat-long query (takes a while)
+    #coords = kv_listings['Normalized_Address'].apply(lambda addr: get_coordinates(addr, geolocator))
+    #coordinates = pd.DataFrame(coords.tolist(), columns=['Latitude', 'Longitude'])
+    kv_listings = pd.concat([kv_listings, coordinates.drop(columns=['Index'])], axis=1)
+    kv_listings['Distance'] = kv_listings[['Longitude', 'Latitude']].apply(
+        lambda row: (distance((58.380099644611306, 26.72226827124339), (row[1], row[0])).km*1000),
+        axis = 1
+    )
 
     kv_listings = kv_listings.drop(columns=['Normalized_Address'])
 
