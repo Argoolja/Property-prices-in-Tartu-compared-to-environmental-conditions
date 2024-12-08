@@ -101,12 +101,26 @@ def get_coordinates(kv_address, geolocator):
     print("Address not found! " + kv_address)
     return None, None
 
+def convert_price(price):
+    if isinstance(price, str):
+        price = re.sub(r"[€,\s]", "", price)
+    return pd.to_numeric(price, errors='coerce')
+
+def convert_size(size):
+    if isinstance(size, str):
+        size = re.sub(r"[m²\s]", "", size)
+    return pd.to_numeric(size, errors='coerce')
+
 if __name__ == "__main__":
     geolocator = Nominatim(user_agent="c09")
     kv_listings = pd.read_csv("data/kv_listings.csv")
     accessibility = pd.read_csv("data/accessibility.csv")
     noise_pollution = pd.read_csv("data/noise_pollution.csv")
     coordinates = pd.read_csv("data/coordinates.csv")
+
+    # Change numeric values to numeric and remove unit
+    kv_listings['Price'] = kv_listings['Price'].apply(convert_price)
+    kv_listings['Size'] = kv_listings['Size'].apply(convert_size)
 
     noise_pollution_tartu = noise_pollution[noise_pollution['taisaadres'].str.contains("Tartu", case=False, na=False)]
     noise_pollution_filtered = noise_pollution_tartu[['lahiaadres', 'MYRAKLASS']]
